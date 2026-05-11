@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Weekly To-Do</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF8F3;
+    --ink: #1C1917;
+    --ink-light: #57534E;
+    --ink-muted: #A8A29E;
+    --rule: #E5E0D8;
+    --rule-strong: #C9C3B8;
+    --accent: #2563EB;
+    --done: #6B7280;
+    --check: #16A34A;
+    --section-h: #F5F2ED;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .week-label { font-family: 'Caveat', cursive; font-size: 24px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .week-input {
+    font-family: 'Caveat', cursive; font-size: 20px;
+    border: none; background: transparent; color: var(--accent);
+    outline: none; flex: 1; min-width: 0;
+    border-bottom: 1.5px solid var(--accent); padding: 2px 4px;
+  }
+  .btn {
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 8px 13px; border-radius: 8px;
+    border: 1px solid var(--rule-strong); background: white; color: var(--ink);
+    cursor: pointer; white-space: nowrap;
+    -webkit-appearance: none; appearance: none;
+  }
+  .btn:active { opacity: 0.75; }
+  .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.sm { padding: 6px 11px; font-size: 12px; border-radius: 6px; }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
+  .btn.warn { background: #FEF2F2; color: #DC2626; border-color: #FCA5A5; }
+
+  /* API KEY BANNER */
+  .api-banner {
+    background: #FFFBEB; border-bottom: 1px solid #FDE68A;
+    padding: 10px 16px; font-size: 13px; color: #92400E;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .api-banner input {
+    flex: 1; min-width: 200px; font-family: monospace; font-size: 12px;
+    padding: 6px 10px; border: 1px solid #FDE68A; border-radius: 6px;
+    background: white; outline: none; color: var(--ink);
+  }
+
+  /* GRID */
+  .content { padding: 14px 16px 100px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+  /* SECTIONS */
+  .section { background: white; border: 1px solid var(--rule-strong); border-radius: 10px; overflow: hidden; }
+  .section.priorities { grid-column: span 2; background: #EFF6FF; border-color: #BFDBFE; }
+  @media (max-width: 600px) { .section.priorities { grid-column: span 1; } }
+
+  .section-header {
+    background: var(--section-h); padding: 8px 10px 8px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .section.priorities .section-header { background: #DBEAFE; border-bottom-color: #BFDBFE; }
+  .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); }
+  .section.priorities .section-title { color: #1D4ED8; }
+  .header-btns { display: flex; align-items: center; gap: 2px; }
+  .add-btn {
+    font-size: 20px; line-height: 1; color: var(--ink-muted);
+    background: none; border: none; cursor: pointer;
+    min-width: 36px; min-height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+  }
+  .add-btn:active { background: var(--rule); }
+
+  /* TASKS */
+  .tasks { padding: 4px 10px; min-height: 50px; }
+  .task { display: flex; align-items: flex-start; gap: 8px; padding: 6px 2px; border-bottom: 1px solid var(--rule); }
+  .task:last-child { border-bottom: none; }
+  .task-check {
+    width: 20px; height: 20px; min-width: 20px;
+    border: 1.5px solid var(--rule-strong); border-radius: 4px;
+    margin-top: 2px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: white; flex-shrink: 0;
+  }
+  .task-check.checked { background: var(--check); border-color: var(--check); }
+  .task-check.checked::after { content: '✓'; font-size: 11px; color: white; font-weight: 700; }
+  .task-text {
+    flex: 1; font-size: 14px; line-height: 1.5; color: var(--ink);
+    word-break: break-word; outline: none; background: transparent;
+    border: none; font-family: 'DM Sans', sans-serif; padding: 0;
+  }
+  .task-text.done { text-decoration: line-through; color: var(--done); }
+  .task-del {
+    font-size: 14px; color: var(--ink-muted); background: none; border: none;
+    cursor: pointer; flex-shrink: 0;
+    min-width: 32px; min-height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+  }
+  .task-del:active { background: #FEF2F2; color: #DC2626; }
+  .empty-hint { color: var(--ink-muted); font-size: 13px; font-style: italic; padding: 8px 2px 10px; text-align: center; }
+  .carryover-badge { font-size: 10px; background: #FEF3C7; color: #92400E; border-radius: 4px; padding: 1px 5px; font-weight: 500; margin-left: 5px; vertical-align: middle; }
+
+  /* DRAW PANEL */
+  .draw-panel { border-top: 1px solid var(--rule-strong); background: #FAFAF8; display: none; }
+  .draw-panel.open { display: block; }
+  .draw-panel-toolbar {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+    border-bottom: 1px solid var(--rule); background: var(--section-h); flex-wrap: wrap;
+  }
+  .draw-panel-toolbar label { font-size: 12px; color: var(--ink-muted); }
+  .draw-panel-toolbar input[type=range] { width: 60px; height: 20px; }
+  .draw-panel-toolbar input[type=color] {
+    width: 28px; height: 28px; border: 1px solid var(--rule-strong);
+    border-radius: 4px; cursor: pointer; padding: 2px; background: white;
+    -webkit-appearance: none;
+  }
+  .draw-actions { display: flex; gap: 6px; margin-left: auto; align-items: center; }
+  .section-canvas {
+    display: block; width: 100%; background: white;
+    touch-action: none; -webkit-user-select: none; user-select: none; cursor: crosshair;
+  }
+  .draw-panel-hint { font-size: 11px; color: var(--ink-muted); font-style: italic; text-align: center; padding: 5px 8px 7px; border-top: 1px solid var(--rule); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: #1C1917; color: white; font-size: 13px; font-weight: 500;
+    padding: 10px 18px; border-radius: 20px;
+    opacity: 0; transition: opacity 0.2s;
+    pointer-events: none; z-index: 999; white-space: nowrap;
+    max-width: 90vw; text-align: center;
+  }
+  .toast.show { opacity: 1; }
+  .toast.error { background: #DC2626; }
+  .toast.loading { background: #2563EB; }
+
+  /* ROLLOVER */
+  .rollover-banner {
+    background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; color: #92400E;
+    margin-bottom: 12px; display: flex; align-items: center;
+    justify-content: space-between; gap: 8px;
+  }
+
+  /* SYNC MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 300; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 16px 16px 0 0;
+    width: 100%; max-width: 700px; padding: 20px 20px 40px;
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--ink-light); margin-bottom: 12px; }
+  .modal textarea {
+    width: 100%; height: 220px; border: 1px solid var(--rule-strong); border-radius: 8px;
+    padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    background: var(--cream); color: var(--ink); resize: none; outline: none; line-height: 1.6;
+  }
+  .modal-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .modal-btns .btn { flex: 1; padding: 12px; font-size: 14px; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- API KEY BANNER (hidden once key is set) -->
+<div class="api-banner" id="apiBanner">
+  <span>🔑 Enter your Anthropic API key to enable handwriting:</span>
+  <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+  <button class="btn primary sm" onclick="saveApiKey()">Save</button>
+</div>
+
+<div class="topbar">
+  <span class="week-label">Week of</span>
+  <input class="week-input" id="weekOf" type="text" placeholder="May 11, 2026" />
+  <button class="btn" onclick="openSyncModal()" title="Sync to Claude">🤖 Sync</button>
+  <button class="btn" onclick="showApiKeyBanner()" title="Update API key">🔑</button>
+  <button class="btn primary" id="newWeekBtn">New Week</button>
+</div>
+
+<div class="content">
+  <div id="rolloverBanner" class="rollover-banner" style="display:none">
+    <span>⚠️ Incomplete tasks from last week</span>
+    <button class="btn sm" onclick="rolloverTasks()">Carry over</button>
+  </div>
+  <div class="grid" id="sectionsGrid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SYNC MODAL -->
+<div class="modal-overlay" id="syncModal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <h3>Sync to Claude</h3>
+      <button onclick="closeSyncModal()" style="background:none;border:none;font-size:22px;color:var(--ink-muted);cursor:pointer;">✕</button>
+    </div>
+    <p>Copy this and paste it into your Claude conversation:</p>
+    <textarea id="syncText" readonly></textarea>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeSyncModal()">Cancel</button>
+      <button class="btn primary" id="copyBtn" onclick="copySyncText()">📋 Copy & Open Claude</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SECTIONS = [
+  { id: 'priorities', label: "Today's Priorities", priority: true },
+  { id: 'clopay_comm', label: 'Clopay Commercial' },
+  { id: 'clopay_resi', label: 'Clopay Residential' },
+  { id: 'williams', label: 'Williams' },
+  { id: 'grasshopper', label: 'Grasshopper' },
+  { id: 'generac', label: 'Generac' },
+  { id: 'ditch_witch', label: 'Ditch Witch Division' },
+  { id: 'eisneramper', label: 'EisnerAmper' },
+  { id: 'kz_rv', label: 'KZ RV' },
+  { id: 'littlefield', label: 'Littlefield & Other' }
+];
+
+var state = { weekOf: 'May 11, 2026', tasks: {}, lastWeekTasks: null };
+SECTIONS.forEach(function(s) { state.tasks[s.id] = []; });
+var apiKey = '';
+var activePanel = null;
+
+// ── IndexedDB ──
+var db = null;
+function openDB(cb) {
+  var req = indexedDB.open('weeklyTodoDB', 4);
+  req.onupgradeneeded = function(e) {
+    var d = e.target.result;
+    if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
+  };
+  req.onsuccess = function(e) { db = e.target.result; cb(); };
+  req.onerror = function() { cb(); };
+}
+function dbGet(key, cb) {
+  if (!db) { cb(null); return; }
+  try {
+    var req = db.transaction('kv','readonly').objectStore('kv').get(key);
+    req.onsuccess = function() { cb(req.result || null); };
+    req.onerror = function() { cb(null); };
+  } catch(e) { cb(null); }
+}
+function dbSet(key, val) {
+  if (!db) return;
+  try { db.transaction('kv','readwrite').objectStore('kv').put(val, key); } catch(e) {}
+}
+function saveState() { dbSet('state', state); }
+function saveKey(k) { dbSet('apiKey', k); }
+
+// ── BOOT ──
+openDB(function() {
+  dbGet('apiKey', function(k) {
+    if (k) { apiKey = k; document.getElementById('apiBanner').style.display = 'none'; }
+    dbGet('state', function(saved) {
+      if (saved && saved.tasks) {
+        state = saved;
+        SECTIONS.forEach(function(s) { if (!state.tasks[s.id]) state.tasks[s.id] = []; });
+      }
+      renderAll();
+    });
+  });
+});
+
+// ── API KEY ──
+function saveApiKey() {
+  var k = document.getElementById('apiKeyInput').value.trim();
+  if (!k || !k.startsWith('sk-')) { showToast('Invalid key — should start with sk-', 'error'); return; }
+  apiKey = k;
+  saveKey(k);
+  document.getElementById('apiBanner').style.display = 'none';
+  showToast('API key saved ✓');
+}
+function showApiKeyBanner() {
+  var b = document.getElementById('apiBanner');
+  b.style.display = 'flex';
+  document.getElementById('apiKeyInput').focus();
+}
+
+// ── RENDER ──
+function renderAll() {
+  document.getElementById('weekOf').value = state.weekOf || 'May 11, 2026';
+  renderSections();
+  checkRollover();
+}
+
+function renderSections() {
+  var grid = document.getElementById('sectionsGrid');
+  grid.innerHTML = '';
+  SECTIONS.forEach(function(sec) { grid.appendChild(buildSection(sec)); });
+}
+
+function buildSection(sec) {
+  var tasks = state.tasks[sec.id] || [];
+  var div = document.createElement('div');
+  div.className = 'section' + (sec.priority ? ' priorities' : '');
+  div.id = 'sec_' + sec.id;
+
+  var hdr = document.createElement('div');
+  hdr.className = 'section-header';
+  hdr.innerHTML =
+    '<span class="section-title">' + sec.label + '</span>' +
+    '<div class="header-btns">' +
+      '<button class="add-btn" style="font-size:15px" onclick="toggleDrawPanel(\'' + sec.id + '\')" title="Handwrite task">✏️</button>' +
+      '<button class="add-btn" onclick="addTypedTask(\'' + sec.id + '\')" title="Type task">+</button>' +
+    '</div>';
+  div.appendChild(hdr);
+
+  var taskList = document.createElement('div');
+  taskList.className = 'tasks';
+  taskList.id = 'tasks_' + sec.id;
+  renderTaskList(taskList, sec.id, tasks);
+  div.appendChild(taskList);
+
+  var panel = document.createElement('div');
+  panel.className = 'draw-panel';
+  panel.id = 'panel_' + sec.id;
+  panel.innerHTML =
+    '<div class="draw-panel-toolbar">' +
+      '<label>Size</label>' +
+      '<input type="range" id="ps_' + sec.id + '" min="1" max="10" value="3">' +
+      '<input type="color" id="pc_' + sec.id + '" value="#1C1917">' +
+      '<div class="draw-actions">' +
+        '<button class="btn sm ghost" onclick="clearPanel(\'' + sec.id + '\')">Clear</button>' +
+        '<button class="btn sm ghost" id="eb_' + sec.id + '" onclick="toggleErase(\'' + sec.id + '\')">Eraser</button>' +
+        '<button class="btn sm" onclick="toggleDrawPanel(\'' + sec.id + '\')">Cancel</button>' +
+        '<button class="btn sm primary" id="rb_' + sec.id + '" onclick="readPanelHandwriting(\'' + sec.id + '\')">Add ✨</button>' +
+      '</div>' +
+    '</div>' +
+    '<canvas class="section-canvas" id="cv_' + sec.id + '" height="180"></canvas>' +
+    '<div class="draw-panel-hint">Write your task with Apple Pencil, then tap Add ✨</div>';
+  div.appendChild(panel);
+
+  return div;
+}
+
+function renderTaskList(el, secId, tasks) {
+  el.innerHTML = '';
+  if (tasks.length === 0) {
+    el.innerHTML = '<div class="empty-hint">Tap ✏️ to handwrite or + to type</div>';
+    return;
+  }
+  tasks.forEach(function(t, i) {
+    var row = document.createElement('div');
+    row.className = 'task';
+    var badge = t.carryover ? '<span class="carryover-badge">carried over</span>' : '';
+    row.innerHTML =
+      '<div class="task-check' + (t.done ? ' checked' : '') + '" onclick="toggleTask(\'' + secId + '\',' + i + ')"></div>' +
+      '<div class="task-text' + (t.done ? ' done' : '') + '" contenteditable="true" ' +
+        'onblur="editTask(\'' + secId + '\',' + i + ',this.innerText)" ' +
+        'onkeydown="if(event.key===\'Enter\'){event.preventDefault();this.blur()}">' +
+        esc(t.text) + badge +
+      '</div>' +
+      '<button class="task-del" onclick="deleteTask(\'' + secId + '\',' + i + ')" aria-label="Delete">✕</button>';
+    el.appendChild(row);
+  });
+}
+
+function refreshTaskList(secId) {
+  var el = document.getElementById('tasks_' + secId);
+  if (el) renderTaskList(el, secId, state.tasks[secId] || []);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── TASK OPS ──
+function toggleTask(secId, idx) {
+  state.tasks[secId][idx].done = !state.tasks[secId][idx].done;
+  saveState(); refreshTaskList(secId);
+}
+function editTask(secId, idx, text) {
+  var t = text.replace(/\n/g,' ').trim();
+  if (!t) { deleteTask(secId, idx); return; }
+  state.tasks[secId][idx].text = t;
+  saveState();
+}
+function deleteTask(secId, idx) {
+  state.tasks[secId].splice(idx, 1);
+  saveState(); refreshTaskList(secId);
+}
+function addTask(secId, text, carryover) {
+  if (!state.tasks[secId]) state.tasks[secId] = [];
+  state.tasks[secId].push({ text: String(text).trim(), done: false, carryover: !!carryover });
+  saveState(); refreshTaskList(secId);
+}
+function addTypedTask(secId) {
+  var sec = SECTIONS.filter(function(s){ return s.id === secId; })[0];
+  var text = prompt('Add task to ' + (sec ? sec.label : '') + ':');
+  if (text && text.trim()) addTask(secId, text.trim());
+}
+
+// ── DRAW PANEL ──
+function toggleDrawPanel(secId) {
+  if (activePanel && activePanel !== secId) closePanel(activePanel);
+  var panel = document.getElementById('panel_' + secId);
+  if (!panel) return;
+  if (panel.classList.contains('open')) {
+    closePanel(secId);
+  } else {
+    panel.classList.add('open');
+    initPanelCanvas(secId);
+    activePanel = secId;
+    setTimeout(function() {
+      var sec = document.getElementById('sec_' + secId);
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+  }
+}
+
+function closePanel(secId) {
+  var panel = document.getElementById('panel_' + secId);
+  if (panel) panel.classList.remove('open');
+  if (activePanel === secId) activePanel = null;
+}
+
+function initPanelCanvas(secId) {
+  var canvas = document.getElementById('cv_' + secId);
+  if (!canvas || canvas._ready) return;
+  canvas._ready = true;
+
+  var dpr = window.devicePixelRatio || 1;
+  var W = canvas.parentElement.clientWidth || 400;
+  var H = 180;
+  canvas.width = Math.floor(W * dpr);
+  canvas.height = Math.floor(H * dpr);
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  drawGuideLines(ctx, W, H);
+
+  var p = { secId: secId, canvas: canvas, ctx: ctx, drawing: false, lastPt: null, erasing: false };
+
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    p.drawing = true; p.lastPt = tpt(e.changedTouches[0], canvas);
+    applyPanelStyle(p, secId);
+    ctx.beginPath(); ctx.moveTo(p.lastPt.x, p.lastPt.y);
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    if (!p.drawing) return;
+    var pt = tpt(e.changedTouches[0], canvas);
+    ctx.beginPath(); ctx.moveTo(p.lastPt.x, p.lastPt.y);
+    ctx.lineTo(pt.x, pt.y); ctx.stroke();
+    p.lastPt = pt;
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function(e) { e.preventDefault(); p.drawing = false; p.lastPt = null; }, { passive: false });
+  canvas.addEventListener('touchcancel', function(e) { e.preventDefault(); p.drawing = false; p.lastPt = null; }, { passive: false });
+
+  canvas.addEventListener('mousedown', function(e) {
+    p.drawing = true; p.lastPt = mpt(e, canvas);
+    applyPanelStyle(p, secId);
+    ctx.beginPath(); ctx.moveTo(p.lastPt.x, p.lastPt.y);
+  });
+  canvas.addEventListener('mousemove', function(e) {
+    if (!p.drawing) return;
+    var pt = mpt(e, canvas);
+    ctx.beginPath(); ctx.moveTo(p.lastPt.x, p.lastPt.y);
+    ctx.lineTo(pt.x, pt.y); ctx.stroke();
+    p.lastPt = pt;
+  });
+  canvas.addEventListener('mouseup', function() { p.drawing = false; });
+  canvas.addEventListener('mouseleave', function() { p.drawing = false; });
+
+  canvas._panel = p;
+}
+
+function applyPanelStyle(p, secId) {
+  var ctx = p.ctx;
+  if (p.erasing) {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineWidth = 28;
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = document.getElementById('pc_' + secId).value;
+    ctx.lineWidth = parseInt(document.getElementById('ps_' + secId).value, 10);
+  }
+}
+
+function clearPanel(secId) {
+  var canvas = document.getElementById('cv_' + secId);
+  if (!canvas || !canvas._panel) return;
+  var dpr = window.devicePixelRatio || 1;
+  var ctx = canvas._panel.ctx;
+  ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+  drawGuideLines(ctx, canvas.width / dpr, canvas.height / dpr);
+}
+
+function toggleErase(secId) {
+  var canvas = document.getElementById('cv_' + secId);
+  if (!canvas || !canvas._panel) return;
+  var p = canvas._panel;
+  p.erasing = !p.erasing;
+  var btn = document.getElementById('eb_' + secId);
+  if (btn) { btn.textContent = p.erasing ? '✏️ Draw' : 'Eraser'; btn.className = p.erasing ? 'btn sm primary' : 'btn sm ghost'; }
+}
+
+function drawGuideLines(ctx, W, H) {
+  ctx.save();
+  ctx.strokeStyle = '#EDE8E0'; ctx.lineWidth = 0.5;
+  for (var y = 36; y < H; y += 36) {
+    ctx.beginPath(); ctx.moveTo(8, y); ctx.lineTo(W - 8, y); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function tpt(touch, canvas) { var r = canvas.getBoundingClientRect(); return { x: touch.clientX - r.left, y: touch.clientY - r.top }; }
+function mpt(e, canvas) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+
+// ── READ HANDWRITING ──
+function readPanelHandwriting(secId) {
+  if (!apiKey) {
+    showApiKeyBanner();
+    showToast('Please enter your API key first', 'error');
+    return;
+  }
+
+  var canvas = document.getElementById('cv_' + secId);
+  if (!canvas) return;
+
+  // Check for ink
+  var pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+  var hasInk = false;
+  for (var i = 3; i < pixels.length; i += 4) {
+    if (pixels[i] > 10) { hasInk = true; break; }
+  }
+  if (!hasInk) { showToast('Canvas is empty — write something first!', 'error'); return; }
+
+  // Flatten onto white background and downscale
+  var dpr = window.devicePixelRatio || 1;
+  var sw = Math.floor(canvas.width / dpr);
+  var sh = Math.floor(canvas.height / dpr);
+  var flat = document.createElement('canvas');
+  flat.width = sw;
+  flat.height = sh;
+  var fctx = flat.getContext('2d');
+  fctx.fillStyle = '#ffffff';
+  fctx.fillRect(0, 0, sw, sh);
+  fctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, sw, sh);
+  var base64 = flat.toDataURL('image/jpeg', 0.85).split(',')[1];
+
+  var btn = document.getElementById('rb_' + secId);
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  showToast('Reading your handwriting...', 'loading');
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+          { type: 'text', text: 'This is a handwritten task on a canvas. Read the handwriting and return ONLY valid JSON: {"tasks":["task 1","task 2"]}. Multiple lines = multiple tasks. Return JSON only, nothing else.' }
+        ]
+      }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) throw new Error(data.error.message);
+    var raw = data.content[0].text.replace(/```json|```/g,'').trim();
+    var json = JSON.parse(raw);
+    var tasks = json.tasks || [];
+    if (typeof tasks === 'string') tasks = [tasks];
+    var added = 0;
+    tasks.forEach(function(t) { if (t && t.trim()) { addTask(secId, t.trim()); added++; } });
+    showToast('Added ' + added + ' task' + (added !== 1 ? 's' : '') + ' \u2713');
+    closePanel(secId);
+  })
+  .catch(function(err) { showToast('Error: ' + err.message, 'error'); console.error(err); })
+  .finally(function() { if (btn) { btn.textContent = 'Add \u2728'; btn.disabled = false; } });
+}
+
+// ── WEEK ──
+document.getElementById('weekOf').addEventListener('blur', function() { state.weekOf = this.value; saveState(); });
+document.getElementById('newWeekBtn').addEventListener('click', function() {
+  if (!confirm('Start a new week? Incomplete tasks can be carried over.')) return;
+  var incomplete = {};
+  SECTIONS.forEach(function(s) { incomplete[s.id] = (state.tasks[s.id]||[]).filter(function(t){ return !t.done; }); });
+  state.lastWeekTasks = incomplete;
+  var d = new Date();
+  state.weekOf = d.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+  SECTIONS.forEach(function(s) { state.tasks[s.id] = []; });
+  saveState(); renderAll();
+});
+
+function checkRollover() {
+  var banner = document.getElementById('rolloverBanner');
+  if (!state.lastWeekTasks) { banner.style.display='none'; return; }
+  var has = Object.keys(state.lastWeekTasks).some(function(k){ return (state.lastWeekTasks[k]||[]).length>0; });
+  banner.style.display = has ? 'flex' : 'none';
+}
+function rolloverTasks() {
+  if (!state.lastWeekTasks) return;
+  SECTIONS.forEach(function(s) { (state.lastWeekTasks[s.id]||[]).forEach(function(t){ addTask(s.id, t.text, true); }); });
+  state.lastWeekTasks = null;
+  saveState(); renderAll();
+}
+
+// ── SYNC ──
+function openSyncModal() {
+  var lines = ['Here is my current weekly to-do list for the week of ' + (state.weekOf || '') + ':', ''];
+  SECTIONS.forEach(function(sec) {
+    var tasks = state.tasks[sec.id] || [];
+    if (!tasks.length) return;
+    lines.push('## ' + sec.label);
+    tasks.forEach(function(t) { lines.push((t.done ? '\u2705' : '\u2b1c') + ' ' + t.text + (t.carryover ? ' [carried over]' : '')); });
+    lines.push('');
+  });
+  lines.push('Please review this list. You can help me add tasks, mark items complete, or plan my week.');
+  document.getElementById('syncText').value = lines.join('\n').trim();
+  document.getElementById('syncModal').classList.add('open');
+}
+function closeSyncModal() {
+  document.getElementById('syncModal').classList.remove('open');
+  document.getElementById('copyBtn').textContent = '\uD83D\uDCCB Copy & Open Claude';
+  document.getElementById('copyBtn').disabled = false;
+}
+function copySyncText() {
+  var text = document.getElementById('syncText').value;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      document.getElementById('copyBtn').textContent = '\u2705 Copied!';
+      document.getElementById('copyBtn').disabled = true;
+      setTimeout(function() { window.open('https://claude.ai', '_blank'); closeSyncModal(); }, 800);
+    }).catch(fallbackCopy);
+  } else { fallbackCopy(); }
+}
+function fallbackCopy() {
+  document.getElementById('syncText').select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.getElementById('copyBtn').textContent = '\u2705 Copied — paste into Claude!';
+}
+
+// ── TOAST ──
+var toastTimer;
+function showToast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  if (type !== 'loading') toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3500);
+}
+</script>
+</body>
+</html>
