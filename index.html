@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Weekly To-Do</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -15,19 +16,23 @@
   html, body { height: 100%; }
   body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 
-  /* TOP BAR */
   .topbar { position: sticky; top: 0; z-index: 100; background: var(--cream); border-bottom: 1px solid var(--rule-strong); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
   .week-label { font-family: 'Caveat', cursive; font-size: 24px; font-weight: 600; color: var(--ink); white-space: nowrap; }
   .week-input { font-family: 'Caveat', cursive; font-size: 20px; border: none; background: transparent; color: var(--accent); outline: none; flex: 1; min-width: 0; border-bottom: 1.5px solid var(--accent); padding: 2px 4px; }
   .btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 13px; border-radius: 8px; border: 1px solid var(--rule-strong); background: white; color: var(--ink); cursor: pointer; white-space: nowrap; -webkit-appearance: none; }
   .btn:active { opacity: 0.75; }
   .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.green { background: #16A34A; color: white; border-color: #16A34A; }
   .btn.sm { padding: 6px 11px; font-size: 12px; border-radius: 6px; }
   .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
 
   /* API BANNER */
   .api-banner { background: #FFFBEB; border-bottom: 1px solid #FDE68A; padding: 10px 16px; font-size: 13px; color: #92400E; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .api-banner input { flex: 1; min-width: 200px; font-family: monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #FDE68A; border-radius: 6px; background: white; outline: none; color: var(--ink); }
+  .api-banner input { flex: 1; min-width: 180px; font-family: monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #FDE68A; border-radius: 6px; background: white; outline: none; color: var(--ink); }
+
+  /* GOOGLE STATUS BAR */
+  .google-bar { background: #F0FDF4; border-bottom: 1px solid #86EFAC; padding: 8px 16px; font-size: 13px; color: #15803D; display: flex; align-items: center; gap: 10px; }
+  .google-bar.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
 
   /* GRID */
   .content { padding: 14px 16px 100px; }
@@ -75,67 +80,32 @@
   .rollover-banner { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #92400E; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
   /* TOAST */
-  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1C1917; color: white; font-size: 13px; font-weight: 500; padding: 10px 18px; border-radius: 20px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #1C1917; color: white; font-size: 13px; font-weight: 500; padding: 10px 18px; border-radius: 20px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
   .toast.show { opacity: 1; }
   .toast.error { background: #DC2626; }
   .toast.loading { background: #2563EB; }
-
-  /* ── CHAT DRAWER ── */
-  .chat-fab { position: fixed; bottom: 24px; right: 20px; z-index: 200; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 16px rgba(37,99,235,0.4); display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
-  .chat-fab:active { transform: scale(0.92); }
-
-  .chat-drawer { position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column; background: white; transform: translateY(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
-  .chat-drawer.open { transform: translateY(0); }
-
-  .chat-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--rule-strong); background: var(--accent); color: white; flex-shrink: 0; }
-  .chat-header h2 { font-size: 16px; font-weight: 600; flex: 1; }
-  .chat-close { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .chat-close:active { background: rgba(255,255,255,0.35); }
-  .chat-context-bar { background: #EFF6FF; border-bottom: 1px solid #BFDBFE; padding: 8px 14px; font-size: 12px; color: #1D4ED8; flex-shrink: 0; }
-
-  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
-
-  .chat-msg { display: flex; gap: 10px; align-items: flex-start; }
-  .chat-msg.user { flex-direction: row-reverse; }
-  .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; }
-  .chat-msg.assistant .chat-bubble { background: var(--section-h); color: var(--ink); border-radius: 4px 16px 16px 16px; }
-  .chat-msg.user .chat-bubble { background: var(--accent); color: white; border-radius: 16px 4px 16px 16px; }
-  .chat-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-top: 2px; }
-  .chat-msg.assistant .chat-avatar { background: var(--accent); color: white; }
-  .chat-msg.user .chat-avatar { background: var(--rule-strong); color: var(--ink-light); }
-
-  .chat-typing { display: flex; gap: 4px; align-items: center; padding: 10px 14px; }
-  .chat-typing span { width: 7px; height: 7px; background: var(--ink-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
-  .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
-  .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
-
-  .chat-input-area { padding: 12px 16px; border-top: 1px solid var(--rule); background: white; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-  .chat-input { flex: 1; border: 1px solid var(--rule-strong); border-radius: 20px; padding: 10px 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; resize: none; max-height: 120px; min-height: 42px; line-height: 1.4; background: var(--cream); color: var(--ink); }
-  .chat-send { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); color: white; border: none; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .chat-send:active { opacity: 0.8; }
-  .chat-send:disabled { background: var(--rule-strong); cursor: default; }
-
-  .chat-welcome { text-align: center; padding: 30px 20px; color: var(--ink-muted); }
-  .chat-welcome .icon { font-size: 40px; margin-bottom: 12px; }
-  .chat-welcome h3 { font-size: 16px; color: var(--ink); margin-bottom: 8px; }
-  .chat-welcome p { font-size: 13px; line-height: 1.6; }
-  .chat-suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
-  .chat-suggestion { background: var(--section-h); border: 1px solid var(--rule-strong); border-radius: 16px; padding: 7px 14px; font-size: 13px; color: var(--ink-light); cursor: pointer; }
-  .chat-suggestion:active { background: var(--rule); }
+  .toast.success { background: #16A34A; }
 </style>
 </head>
 <body>
 
+<!-- API KEY BANNER -->
 <div class="api-banner" id="apiBanner">
-  <span>🔑 Enter your Anthropic API key:</span>
+  <span>🔑 Anthropic API key:</span>
   <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
   <button class="btn primary sm" onclick="saveApiKey()">Save</button>
 </div>
 
+<!-- GOOGLE STATUS BAR -->
+<div class="google-bar warn" id="googleBar">
+  <span id="googleBarText">📋 Sign in with Google to enable "Share with Claude"</span>
+  <button class="btn sm" id="googleSignInBtn" onclick="signInGoogle()">Sign in</button>
+</div>
+
 <div class="topbar">
   <span class="week-label">Week of</span>
-  <input class="week-input" id="weekOf" type="text" placeholder="May 11, 2026" />
+  <input class="week-input" id="weekOf" type="text" placeholder="May 12, 2026" />
+  <button class="btn green" id="shareBtn" onclick="shareWithClaude()" title="Share with Claude" style="display:none">📤 Share with Claude</button>
   <button class="btn" onclick="showApiKeyBanner()" title="API Key">🔑</button>
   <button class="btn primary" id="newWeekBtn">New Week</button>
 </div>
@@ -150,39 +120,11 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- CHAT FAB -->
-<button class="chat-fab" onclick="openChat()" title="Chat with Claude">🤖</button>
-
-<!-- CHAT DRAWER -->
-<div class="chat-drawer" id="chatDrawer">
-  <div class="chat-header">
-    <div class="chat-avatar" style="background:rgba(255,255,255,0.2);font-size:18px;">🤖</div>
-    <h2>Claude</h2>
-    <button class="chat-close" onclick="closeChat()">✕</button>
-  </div>
-  <div class="chat-context-bar" id="chatContextBar">📋 Sharing your task list automatically</div>
-  <div class="chat-messages" id="chatMessages">
-    <div class="chat-welcome" id="chatWelcome">
-      <div class="icon">🤖</div>
-      <h3>Hi! I can see your task list.</h3>
-      <p>Ask me to add tasks, check things off, help prioritize your week, or anything else.</p>
-      <div class="chat-suggestions">
-        <div class="chat-suggestion" onclick="sendSuggestion(this)">What's still open this week?</div>
-        <div class="chat-suggestion" onclick="sendSuggestion(this)">Help me prioritize today</div>
-        <div class="chat-suggestion" onclick="sendSuggestion(this)">What did I complete?</div>
-        <div class="chat-suggestion" onclick="sendSuggestion(this)">Add a task for me</div>
-      </div>
-    </div>
-  </div>
-  <div class="chat-input-area">
-    <textarea class="chat-input" id="chatInput" placeholder="Ask Claude anything about your tasks..." rows="1"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"
-      oninput="autoResize(this)"></textarea>
-    <button class="chat-send" id="chatSendBtn" onclick="sendChat()">&#8593;</button>
-  </div>
-</div>
-
 <script>
+var GOOGLE_CLIENT_ID = '1066545707672-uie19aq0buuou5rigaf8c7quq33rp0ce.apps.googleusercontent.com';
+var SCOPES = 'https://www.googleapis.com/auth/drive.file';
+var DOC_ID_KEY = 'claudeDocId';
+
 var SECTIONS = [
   { id: 'priorities', label: "Today's Priorities", priority: true },
   { id: 'clopay_comm', label: 'Clopay Commercial' },
@@ -196,16 +138,17 @@ var SECTIONS = [
   { id: 'littlefield', label: 'Littlefield & Other' }
 ];
 
-var state = { weekOf: 'May 11, 2026', tasks: {}, lastWeekTasks: null };
+var state = { weekOf: 'May 12, 2026', tasks: {}, lastWeekTasks: null };
 SECTIONS.forEach(function(s) { state.tasks[s.id] = []; });
 var apiKey = '';
 var activePanel = null;
-var chatHistory = []; // [{role, content}]
+var googleToken = null;
+var docId = null;
 
 // ── IndexedDB ──
 var db = null;
 function openDB(cb) {
-  var req = indexedDB.open('weeklyTodoDB', 5);
+  var req = indexedDB.open('weeklyTodoDB', 6);
   req.onupgradeneeded = function(e) { var d = e.target.result; if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); };
   req.onsuccess = function(e) { db = e.target.result; cb(); };
   req.onerror = function() { cb(); };
@@ -224,9 +167,12 @@ function saveState() { dbSet('state', state); }
 openDB(function() {
   dbGet('apiKey', function(k) {
     if (k) { apiKey = k; document.getElementById('apiBanner').style.display = 'none'; }
-    dbGet('state', function(saved) {
-      if (saved && saved.tasks) { state = saved; SECTIONS.forEach(function(s){ if (!state.tasks[s.id]) state.tasks[s.id]=[]; }); }
-      renderAll();
+    dbGet(DOC_ID_KEY, function(d) {
+      if (d) docId = d;
+      dbGet('state', function(saved) {
+        if (saved && saved.tasks) { state = saved; SECTIONS.forEach(function(s){ if (!state.tasks[s.id]) state.tasks[s.id]=[]; }); }
+        renderAll();
+      });
     });
   });
 });
@@ -239,14 +185,135 @@ function saveApiKey() {
   document.getElementById('apiBanner').style.display = 'none';
   showToast('API key saved!');
 }
-function showApiKeyBanner() {
-  document.getElementById('apiBanner').style.display = 'flex';
-  document.getElementById('apiKeyInput').focus();
+function showApiKeyBanner() { document.getElementById('apiBanner').style.display = 'flex'; document.getElementById('apiKeyInput').focus(); }
+
+// ── GOOGLE OAUTH (Token Client) ──
+var tokenClient;
+window.onload = function() {
+  // Wait for GSI library
+  var interval = setInterval(function() {
+    if (window.google && window.google.accounts) {
+      clearInterval(interval);
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: SCOPES,
+        callback: function(resp) {
+          if (resp.error) { showToast('Google sign-in failed: ' + resp.error, 'error'); return; }
+          googleToken = resp.access_token;
+          updateGoogleBar(true);
+          document.getElementById('shareBtn').style.display = '';
+          showToast('Signed in to Google ✓', 'success');
+        }
+      });
+    }
+  }, 200);
+};
+
+function signInGoogle() {
+  if (!tokenClient) { showToast('Google sign-in not ready yet, try again', 'error'); return; }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function updateGoogleBar(signedIn) {
+  var bar = document.getElementById('googleBar');
+  var txt = document.getElementById('googleBarText');
+  var btn = document.getElementById('googleSignInBtn');
+  if (signedIn) {
+    bar.className = 'google-bar';
+    txt.textContent = '✅ Connected to Google Drive — tap "Share with Claude" anytime';
+    btn.style.display = 'none';
+  } else {
+    bar.className = 'google-bar warn';
+    txt.textContent = '📋 Sign in with Google to enable "Share with Claude"';
+    btn.style.display = '';
+  }
+}
+
+// ── SHARE WITH CLAUDE ──
+function buildDocContent() {
+  var lines = [];
+  lines.push('WEEKLY TO-DO LIST');
+  lines.push('Week of: ' + (state.weekOf || ''));
+  lines.push('Last updated: ' + new Date().toLocaleString());
+  lines.push('');
+  lines.push('---');
+  SECTIONS.forEach(function(sec) {
+    var tasks = state.tasks[sec.id] || [];
+    lines.push('');
+    lines.push(sec.label.toUpperCase());
+    if (!tasks.length) { lines.push('  (no tasks)'); return; }
+    tasks.forEach(function(t) {
+      var status = t.done ? '[DONE]' : '[OPEN]';
+      var carry = t.carryover ? ' *carried over*' : '';
+      lines.push('  ' + status + ' ' + t.text + carry);
+    });
+  });
+  lines.push('');
+  lines.push('---');
+  var open = 0, done = 0;
+  SECTIONS.forEach(function(s){ (state.tasks[s.id]||[]).forEach(function(t){ t.done ? done++ : open++; }); });
+  lines.push('SUMMARY: ' + open + ' open, ' + done + ' completed');
+  return lines.join('\n');
+}
+
+function shareWithClaude() {
+  if (!googleToken) { signInGoogle(); return; }
+  showToast('Syncing to Google Drive...', 'loading');
+
+  var content = buildDocContent();
+  var encoded = unescape(encodeURIComponent(content));
+
+  if (docId) {
+    // Update existing doc
+    updateDoc(docId, encoded);
+  } else {
+    // Create new doc
+    createDoc(encoded);
+  }
+}
+
+function createDoc(encoded) {
+  // Step 1: Create the file metadata
+  fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Claude Weekly To-Do', mimeType: 'text/plain' })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(file) {
+    docId = file.id;
+    dbSet(DOC_ID_KEY, docId);
+    return updateDoc(docId, encoded);
+  })
+  .catch(function(err) { showToast('Error creating doc: ' + err.message, 'error'); });
+}
+
+function updateDoc(id, encoded) {
+  return fetch('https://www.googleapis.com/upload/drive/v3/files/' + id + '?uploadType=media', {
+    method: 'PATCH',
+    headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'text/plain' },
+    body: encoded
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Upload failed: ' + r.status);
+    showToast('✅ Synced to Google Drive! Claude can now see your tasks.', 'success');
+  })
+  .catch(function(err) {
+    // Token may have expired — re-auth and retry
+    if (err.message.indexOf('401') !== -1 || err.message.indexOf('403') !== -1) {
+      googleToken = null;
+      updateGoogleBar(false);
+      document.getElementById('shareBtn').style.display = 'none';
+      showToast('Google session expired — please sign in again', 'error');
+    } else {
+      showToast('Sync error: ' + err.message, 'error');
+    }
+  });
 }
 
 // ── RENDER ──
 function renderAll() {
-  document.getElementById('weekOf').value = state.weekOf || 'May 11, 2026';
+  document.getElementById('weekOf').value = state.weekOf || 'May 12, 2026';
   renderSections(); checkRollover();
 }
 
@@ -294,7 +361,7 @@ function toggleTask(secId, idx) { state.tasks[secId][idx].done = !state.tasks[se
 function editTask(secId, idx, text) { var t = text.replace(/\n/g,' ').trim(); if (!t) { deleteTask(secId, idx); return; } state.tasks[secId][idx].text = t; saveState(); }
 function deleteTask(secId, idx) { state.tasks[secId].splice(idx, 1); saveState(); refreshTaskList(secId); }
 function addTask(secId, text, carryover) { if (!state.tasks[secId]) state.tasks[secId]=[]; state.tasks[secId].push({text:String(text).trim(),done:false,carryover:!!carryover}); saveState(); refreshTaskList(secId); }
-function addTypedTask(secId) { var sec=SECTIONS.filter(function(s){return s.id===secId;})[0]; var text=prompt('Add task to '+(sec?sec.label:'')+':'); if (text&&text.trim()) addTask(secId, text.trim()); }
+function addTypedTask(secId) { var sec=SECTIONS.filter(function(s){return s.id===secId;})[0]; var text=prompt('Add task to '+(sec?sec.label:'')+':'); if(text&&text.trim()) addTask(secId, text.trim()); }
 
 // ── DRAW PANEL ──
 function toggleDrawPanel(secId) {
@@ -356,9 +423,23 @@ function readPanelHandwriting(secId) {
   var base64=flat.toDataURL('image/jpeg',0.85).split(',')[1];
   var btn=document.getElementById('rb_'+secId); if(btn){btn.textContent='⏳';btn.disabled=true;}
   showToast('Reading your handwriting...', 'loading');
-  callClaude([{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},{type:'text',text:'Read this handwritten task and return ONLY valid JSON: {"tasks":["task 1","task 2"]}. Multiple lines = multiple tasks. JSON only, nothing else.'}]}], null)
-  .then(function(reply) {
-    var json = JSON.parse(reply.replace(/```json|```/g,'').trim());
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 500,
+      messages: [{ role:'user', content:[
+        { type:'image', source:{type:'base64', media_type:'image/jpeg', data:base64} },
+        { type:'text', text:'Read this handwritten task and return ONLY valid JSON: {"tasks":["task 1","task 2"]}. Multiple lines = multiple tasks. JSON only, nothing else.' }
+      ]}]
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data.error) throw new Error(data.error.message);
+    var json = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
     var tasks = json.tasks || []; if(typeof tasks==='string') tasks=[tasks];
     var added=0; tasks.forEach(function(t){if(t&&t.trim()){addTask(secId,t.trim());added++;}});
     showToast('Added '+added+' task'+(added!==1?'s':'')+' \u2713');
@@ -366,132 +447,6 @@ function readPanelHandwriting(secId) {
   })
   .catch(function(err){ showToast('Error: '+err.message,'error'); })
   .finally(function(){ if(btn){btn.textContent='Add \u2728';btn.disabled=false;} });
-}
-
-// ── CLAUDE API ──
-function buildTaskContext() {
-  var lines = ['Current weekly to-do list for week of ' + (state.weekOf||'') + ':'];
-  SECTIONS.forEach(function(sec) {
-    var tasks = state.tasks[sec.id]||[];
-    if (!tasks.length) return;
-    lines.push('\n' + sec.label + ':');
-    tasks.forEach(function(t,i){ lines.push('  ['+(t.done?'x':' ')+'] '+t.text+(t.carryover?' (carried over)':'')); });
-  });
-  return lines.join('\n');
-}
-
-function callClaude(messages, system) {
-  var headers = {
-    'Content-Type': 'application/json',
-    'x-api-key': apiKey,
-    'anthropic-version': '2023-06-01',
-    'anthropic-dangerous-direct-browser-access': 'true'
-  };
-  var body = { model: 'claude-sonnet-4-6', max_tokens: 1024, messages: messages };
-  if (system) body.system = system;
-  return fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:headers, body:JSON.stringify(body) })
-    .then(function(r){ return r.json(); })
-    .then(function(data){ if(data.error) throw new Error(data.error.message); return data.content[0].text; });
-}
-
-// ── CHAT ──
-function openChat() {
-  if (!apiKey) { showApiKeyBanner(); showToast('Enter your API key first', 'error'); return; }
-  document.getElementById('chatDrawer').classList.add('open');
-  updateContextBar();
-  setTimeout(function(){ document.getElementById('chatInput').focus(); }, 300);
-}
-function closeChat() { document.getElementById('chatDrawer').classList.remove('open'); }
-
-function updateContextBar() {
-  var total = 0, done = 0;
-  SECTIONS.forEach(function(s){ var t=state.tasks[s.id]||[]; total+=t.length; done+=t.filter(function(x){return x.done;}).length; });
-  document.getElementById('chatContextBar').textContent = '📋 ' + total + ' tasks (' + done + ' done, ' + (total-done) + ' open) — Week of ' + (state.weekOf||'');
-}
-
-function sendSuggestion(el) {
-  document.getElementById('chatInput').value = el.textContent;
-  sendChat();
-}
-
-function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
-
-function addChatMessage(role, text) {
-  var welcome = document.getElementById('chatWelcome');
-  if (welcome) welcome.style.display = 'none';
-  var msgs = document.getElementById('chatMessages');
-  var div = document.createElement('div');
-  div.className = 'chat-msg ' + role;
-  div.innerHTML = '<div class="chat-avatar">' + (role==='assistant'?'🤖':'👤') + '</div><div class="chat-bubble">' + esc(text).replace(/\n/g,'<br>') + '</div>';
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  return div;
-}
-
-function showTyping() {
-  var welcome = document.getElementById('chatWelcome');
-  if (welcome) welcome.style.display = 'none';
-  var msgs = document.getElementById('chatMessages');
-  var div = document.createElement('div');
-  div.className = 'chat-msg assistant'; div.id = 'typingIndicator';
-  div.innerHTML = '<div class="chat-avatar">🤖</div><div class="chat-bubble"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
-  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
-}
-function hideTyping() { var el=document.getElementById('typingIndicator'); if(el) el.remove(); }
-
-function sendChat() {
-  var input = document.getElementById('chatInput');
-  var text = input.value.trim();
-  if (!text) return;
-  input.value = ''; input.style.height = 'auto';
-  document.getElementById('chatSendBtn').disabled = true;
-
-  addChatMessage('user', text);
-  chatHistory.push({ role:'user', content: text });
-  showTyping();
-
-  var system = 'You are a helpful assistant embedded in a weekly to-do app. You have full access to the user\'s task list below. You can help them understand their tasks, prioritize, and plan.\n\nWhen the user asks you to add a task, respond conversationally AND include a special action at the end of your message in this exact format:\nACTION:ADD_TASK:section_id:task text\n\nAvailable section IDs: priorities, clopay_comm, clopay_resi, williams, grasshopper, generac, ditch_witch, eisneramper, kz_rv, littlefield\n\nWhen the user asks you to complete/check off a task, include:\nACTION:COMPLETE_TASK:section_id:task text (match as closely as possible)\n\nYou can include multiple ACTION lines if needed. Keep responses concise and friendly.\n\n' + buildTaskContext();
-
-  var messages = chatHistory.map(function(m){ return {role:m.role, content:m.content}; });
-
-  callClaude(messages, system)
-  .then(function(reply) {
-    hideTyping();
-    // Parse and execute any actions
-    var actions = [];
-    var cleanReply = reply.replace(/ACTION:(ADD_TASK|COMPLETE_TASK):([^:\n]+):([^\n]+)/g, function(match, action, secId, taskText) {
-      actions.push({action:action, secId:secId.trim(), taskText:taskText.trim()});
-      return '';
-    }).trim();
-
-    actions.forEach(function(a) {
-      if (a.action === 'ADD_TASK') {
-        if (state.tasks[a.secId] !== undefined) {
-          addTask(a.secId, a.taskText);
-          showToast('Added: ' + a.taskText);
-        }
-      } else if (a.action === 'COMPLETE_TASK') {
-        var tasks = state.tasks[a.secId]||[];
-        var found = false;
-        tasks.forEach(function(t, i) {
-          if (!found && t.text.toLowerCase().indexOf(a.taskText.toLowerCase()) !== -1) {
-            state.tasks[a.secId][i].done = true; found = true;
-            saveState(); refreshTaskList(a.secId);
-          }
-        });
-        if (found) showToast('Completed: ' + a.taskText);
-      }
-    });
-
-    addChatMessage('assistant', cleanReply || reply);
-    chatHistory.push({ role:'assistant', content: reply });
-    updateContextBar();
-  })
-  .catch(function(err) {
-    hideTyping();
-    addChatMessage('assistant', 'Sorry, I ran into an error: ' + err.message);
-  })
-  .finally(function() { document.getElementById('chatSendBtn').disabled = false; });
 }
 
 // ── WEEK ──
@@ -503,7 +458,7 @@ document.getElementById('newWeekBtn').addEventListener('click', function(){
   state.lastWeekTasks=incomplete;
   var d=new Date(); state.weekOf=d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   SECTIONS.forEach(function(s){state.tasks[s.id]=[];});
-  saveState(); renderAll(); chatHistory=[];
+  saveState(); renderAll();
 });
 
 function checkRollover() { var b=document.getElementById('rolloverBanner'); if(!state.lastWeekTasks){b.style.display='none';return;} var has=Object.keys(state.lastWeekTasks).some(function(k){return (state.lastWeekTasks[k]||[]).length>0;}); b.style.display=has?'flex':'none'; }
