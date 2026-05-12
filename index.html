@@ -15,8 +15,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
   body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
-
-  .topbar { position: sticky; top: 0; z-index: 100; background: var(--cream); border-bottom: 1px solid var(--rule-strong); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .topbar { position: sticky; top: 0; z-index: 100; background: var(--cream); border-bottom: 1px solid var(--rule-strong); padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .week-label { font-family: 'Caveat', cursive; font-size: 24px; font-weight: 600; color: var(--ink); white-space: nowrap; }
   .week-input { font-family: 'Caveat', cursive; font-size: 20px; border: none; background: transparent; color: var(--accent); outline: none; flex: 1; min-width: 0; border-bottom: 1.5px solid var(--accent); padding: 2px 4px; }
   .btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 13px; border-radius: 8px; border: 1px solid var(--rule-strong); background: white; color: var(--ink); cursor: pointer; white-space: nowrap; -webkit-appearance: none; }
@@ -25,20 +24,22 @@
   .btn.green { background: #16A34A; color: white; border-color: #16A34A; }
   .btn.sm { padding: 6px 11px; font-size: 12px; border-radius: 6px; }
   .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); }
-
-  /* API BANNER */
+  /* BANNERS */
   .api-banner { background: #FFFBEB; border-bottom: 1px solid #FDE68A; padding: 10px 16px; font-size: 13px; color: #92400E; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .api-banner input { flex: 1; min-width: 180px; font-family: monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #FDE68A; border-radius: 6px; background: white; outline: none; color: var(--ink); }
-
-  /* GOOGLE STATUS BAR */
+  .github-banner { background: #F0FDF4; border-bottom: 1px solid #86EFAC; padding: 10px 16px; font-size: 13px; color: #15803D; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .github-banner.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+  .github-banner input { flex: 1; min-width: 200px; font-family: monospace; font-size: 12px; padding: 6px 10px; border: 1px solid #86EFAC; border-radius: 6px; background: white; outline: none; color: var(--ink); }
+  .github-banner.warn input { border-color: #FDE68A; }
   .google-bar { background: #F0FDF4; border-bottom: 1px solid #86EFAC; padding: 8px 16px; font-size: 13px; color: #15803D; display: flex; align-items: center; gap: 10px; }
   .google-bar.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
-
+  /* GIST PILL */
+  .gist-pill { display: inline-flex; align-items: center; gap: 6px; background: #DCFCE7; border: 1px solid #86EFAC; border-radius: 20px; padding: 3px 10px 3px 8px; font-size: 12px; color: #15803D; font-weight: 500; text-decoration: none; margin-left: 4px; }
+  .gist-pill:hover { background: #BBF7D0; }
   /* GRID */
   .content { padding: 14px 16px 100px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-
   /* SECTIONS */
   .section { background: white; border: 1px solid var(--rule-strong); border-radius: 10px; overflow: hidden; }
   .section.priorities { grid-column: span 2; background: #EFF6FF; border-color: #BFDBFE; }
@@ -50,7 +51,6 @@
   .header-btns { display: flex; align-items: center; gap: 2px; }
   .add-btn { font-size: 20px; line-height: 1; color: var(--ink-muted); background: none; border: none; cursor: pointer; min-width: 36px; min-height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
   .add-btn:active { background: var(--rule); }
-
   /* TASKS */
   .tasks { padding: 4px 10px; min-height: 50px; }
   .task { display: flex; align-items: flex-start; gap: 8px; padding: 6px 2px; border-bottom: 1px solid var(--rule); }
@@ -64,7 +64,6 @@
   .task-del:active { background: #FEF2F2; color: #DC2626; }
   .empty-hint { color: var(--ink-muted); font-size: 13px; font-style: italic; padding: 8px 2px 10px; text-align: center; }
   .carryover-badge { font-size: 10px; background: #FEF3C7; color: #92400E; border-radius: 4px; padding: 1px 5px; font-weight: 500; margin-left: 5px; vertical-align: middle; }
-
   /* DRAW PANEL */
   .draw-panel { border-top: 1px solid var(--rule-strong); background: #FAFAF8; display: none; }
   .draw-panel.open { display: block; }
@@ -75,10 +74,8 @@
   .draw-actions { display: flex; gap: 6px; margin-left: auto; align-items: center; }
   .section-canvas { display: block; width: 100%; background: white; touch-action: none; -webkit-user-select: none; user-select: none; cursor: crosshair; }
   .draw-panel-hint { font-size: 11px; color: var(--ink-muted); font-style: italic; text-align: center; padding: 5px 8px 7px; border-top: 1px solid var(--rule); }
-
   /* ROLLOVER */
   .rollover-banner { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #92400E; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-
   /* TOAST */
   .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #1C1917; color: white; font-size: 13px; font-weight: 500; padding: 10px 18px; border-radius: 20px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
   .toast.show { opacity: 1; }
@@ -96,16 +93,24 @@
   <button class="btn primary sm" onclick="saveApiKey()">Save</button>
 </div>
 
+<!-- GITHUB TOKEN BANNER -->
+<div class="github-banner warn" id="githubBanner">
+  <span>🐙 GitHub token for Claude sync:</span>
+  <input type="password" id="githubTokenInput" placeholder="github_pat_..." />
+  <button class="btn sm" style="background:#1C1917;color:white;border-color:#1C1917" onclick="saveGithubToken()">Save</button>
+  <a href="https://github.com/settings/tokens/new?scopes=gist&description=TodoClaudeSync" target="_blank" class="btn sm ghost">Create token ↗</a>
+</div>
+
 <!-- GOOGLE STATUS BAR -->
 <div class="google-bar warn" id="googleBar">
-  <span id="googleBarText">📋 Sign in with Google to enable "Share with Claude"</span>
+  <span id="googleBarText">📋 Sign in with Google to enable Drive sync</span>
   <button class="btn sm" id="googleSignInBtn" onclick="signInGoogle()">Sign in</button>
 </div>
 
 <div class="topbar">
   <span class="week-label">Week of</span>
   <input class="week-input" id="weekOf" type="text" placeholder="May 12, 2026" />
-  <button class="btn green" id="shareBtn" onclick="shareWithClaude()" title="Share with Claude" style="display:none">📤 Share with Claude</button>
+  <button class="btn green" id="shareBtn" onclick="shareWithClaude()" title="Sync to Claude" style="display:none">🤖 Sync</button>
   <button class="btn" onclick="showApiKeyBanner()" title="API Key">🔑</button>
   <button class="btn primary" id="newWeekBtn">New Week</button>
 </div>
@@ -114,6 +119,11 @@
   <div id="rolloverBanner" class="rollover-banner" style="display:none">
     <span>⚠️ Incomplete tasks from last week</span>
     <button class="btn sm" onclick="rolloverTasks()">Carry over</button>
+  </div>
+  <!-- Gist link shown after first sync -->
+  <div id="gistLinkRow" style="display:none; margin-bottom:12px; font-size:13px; color:var(--ink-muted);">
+    🤖 Claude reads your tasks from: <a id="gistLink" class="gist-pill" href="#" target="_blank">📋 View Gist</a>
+    <span style="margin-left:6px; font-size:12px;">— say "check my tasks" anytime</span>
   </div>
   <div class="grid" id="sectionsGrid"></div>
 </div>
@@ -124,6 +134,8 @@
 var GOOGLE_CLIENT_ID = '1066545707672-uie19aq0buuou5rigaf8c7quq33rp0ce.apps.googleusercontent.com';
 var SCOPES = 'https://www.googleapis.com/auth/drive.file';
 var DOC_ID_KEY = 'claudeDocId';
+var GIST_ID_KEY = 'claudeGistId';
+var GIST_FILENAME = 'claude-weekly-todo.json';
 
 var SECTIONS = [
   { id: 'priorities', label: "Today's Priorities", priority: true },
@@ -140,7 +152,10 @@ var SECTIONS = [
 
 var state = { weekOf: 'May 12, 2026', tasks: {}, lastWeekTasks: null };
 SECTIONS.forEach(function(s) { state.tasks[s.id] = []; });
+
 var apiKey = '';
+var githubToken = '';
+var gistId = null;
 var activePanel = null;
 var googleToken = null;
 var docId = null;
@@ -148,7 +163,7 @@ var docId = null;
 // ── IndexedDB ──
 var db = null;
 function openDB(cb) {
-  var req = indexedDB.open('weeklyTodoDB', 6);
+  var req = indexedDB.open('weeklyTodoDB', 7);
   req.onupgradeneeded = function(e) { var d = e.target.result; if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); };
   req.onsuccess = function(e) { db = e.target.result; cb(); };
   req.onerror = function() { cb(); };
@@ -167,11 +182,17 @@ function saveState() { dbSet('state', state); }
 openDB(function() {
   dbGet('apiKey', function(k) {
     if (k) { apiKey = k; document.getElementById('apiBanner').style.display = 'none'; }
-    dbGet(DOC_ID_KEY, function(d) {
-      if (d) docId = d;
-      dbGet('state', function(saved) {
-        if (saved && saved.tasks) { state = saved; SECTIONS.forEach(function(s){ if (!state.tasks[s.id]) state.tasks[s.id]=[]; }); }
-        renderAll();
+    dbGet('githubToken', function(gt) {
+      if (gt) { githubToken = gt; document.getElementById('githubBanner').style.display = 'none'; }
+      dbGet(GIST_ID_KEY, function(gid) {
+        if (gid) { gistId = gid; showGistLink(); }
+        dbGet(DOC_ID_KEY, function(d) {
+          if (d) docId = d;
+          dbGet('state', function(saved) {
+            if (saved && saved.tasks) { state = saved; SECTIONS.forEach(function(s){ if (!state.tasks[s.id]) state.tasks[s.id]=[]; }); }
+            renderAll();
+          });
+        });
       });
     });
   });
@@ -187,10 +208,91 @@ function saveApiKey() {
 }
 function showApiKeyBanner() { document.getElementById('apiBanner').style.display = 'flex'; document.getElementById('apiKeyInput').focus(); }
 
-// ── GOOGLE OAUTH (Token Client) ──
+// ── GITHUB TOKEN ──
+function saveGithubToken() {
+  var t = document.getElementById('githubTokenInput').value.trim();
+  if (!t) { showToast('Please enter a GitHub token', 'error'); return; }
+  githubToken = t; dbSet('githubToken', t);
+  document.getElementById('githubBanner').style.display = 'none';
+  showToast('GitHub token saved! ✓', 'success');
+}
+
+// ── GIST LINK UI ──
+function showGistLink() {
+  if (!gistId) return;
+  var row = document.getElementById('gistLinkRow');
+  var link = document.getElementById('gistLink');
+  var url = 'https://gist.githubusercontent.com/bcampbell-a11y/' + gistId + '/raw/' + GIST_FILENAME;
+  link.href = 'https://gist.github.com/' + gistId;
+  link.title = url;
+  row.style.display = 'block';
+}
+
+// ── BUILD GIST CONTENT ──
+function buildGistContent() {
+  var open = 0, done = 0;
+  var sections = {};
+  SECTIONS.forEach(function(sec) {
+    var tasks = state.tasks[sec.id] || [];
+    sections[sec.id] = {
+      label: sec.label,
+      tasks: tasks.map(function(t) {
+        if (t.done) done++; else open++;
+        return { text: t.text, done: t.done, carryover: !!t.carryover };
+      })
+    };
+  });
+  return JSON.stringify({
+    weekOf: state.weekOf,
+    lastUpdated: new Date().toISOString(),
+    summary: { open: open, done: done },
+    sections: sections
+  }, null, 2);
+}
+
+// ── SYNC TO GIST ──
+function syncToGist() {
+  if (!githubToken) return Promise.resolve(); // skip silently if no token
+  var content = buildGistContent();
+  var files = {};
+  files[GIST_FILENAME] = { content: content };
+
+  if (gistId) {
+    // Update existing gist
+    return fetch('https://api.github.com/gists/' + gistId, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'token ' + githubToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files: files })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Gist update failed: ' + r.status);
+      return r.json();
+    }).then(function(data) {
+      showGistLink();
+    });
+  } else {
+    // Create new public gist
+    return fetch('https://api.github.com/gists', {
+      method: 'POST',
+      headers: { 'Authorization': 'token ' + githubToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: 'Claude Weekly To-Do — auto-synced',
+        public: true,
+        files: files
+      })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Gist create failed: ' + r.status);
+      return r.json();
+    }).then(function(data) {
+      gistId = data.id;
+      dbSet(GIST_ID_KEY, gistId);
+      showGistLink();
+    });
+  }
+}
+
+// ── GOOGLE OAUTH ──
 var tokenClient;
 window.onload = function() {
-  // Wait for GSI library
   var interval = setInterval(function() {
     if (window.google && window.google.accounts) {
       clearInterval(interval);
@@ -208,28 +310,27 @@ window.onload = function() {
     }
   }, 200);
 };
-
 function signInGoogle() {
   if (!tokenClient) { showToast('Google sign-in not ready yet, try again', 'error'); return; }
   tokenClient.requestAccessToken({ prompt: 'consent' });
 }
-
 function updateGoogleBar(signedIn) {
   var bar = document.getElementById('googleBar');
   var txt = document.getElementById('googleBarText');
   var btn = document.getElementById('googleSignInBtn');
   if (signedIn) {
     bar.className = 'google-bar';
-    txt.textContent = '✅ Connected to Google Drive — tap "Share with Claude" anytime';
+    txt.textContent = '✅ Connected to Google Drive';
     btn.style.display = 'none';
+    document.getElementById('shareBtn').style.display = '';
   } else {
     bar.className = 'google-bar warn';
-    txt.textContent = '📋 Sign in with Google to enable "Share with Claude"';
+    txt.textContent = '📋 Sign in with Google to enable Drive sync';
     btn.style.display = '';
   }
 }
 
-// ── SHARE WITH CLAUDE ──
+// ── BUILD DOC CONTENT (plain text for Google Drive) ──
 function buildDocContent() {
   var lines = [];
   lines.push('WEEKLY TO-DO LIST');
@@ -256,57 +357,57 @@ function buildDocContent() {
   return lines.join('\n');
 }
 
+// ── SHARE WITH CLAUDE (Drive + Gist) ──
 function shareWithClaude() {
-  if (!googleToken) { signInGoogle(); return; }
-  showToast('Syncing to Google Drive...', 'loading');
-
-  var content = buildDocContent();
-  var encoded = unescape(encodeURIComponent(content));
-
-  if (docId) {
-    // Update existing doc
-    updateDoc(docId, encoded);
-  } else {
-    // Create new doc
-    createDoc(encoded);
+  if (!googleToken && !githubToken) {
+    showToast('Sign in to Google or add a GitHub token first', 'error');
+    return;
   }
+  showToast('Syncing...', 'loading');
+
+  var drivePromise = googleToken ? syncToDrive() : Promise.resolve();
+  var gistPromise = githubToken ? syncToGist() : Promise.resolve();
+
+  Promise.all([drivePromise, gistPromise])
+    .then(function() {
+      var msg = '✅ Synced!';
+      if (githubToken) msg += ' Claude can now read your tasks directly.';
+      showToast(msg, 'success');
+    })
+    .catch(function(err) {
+      showToast('Sync error: ' + err.message, 'error');
+    });
 }
 
+// ── GOOGLE DRIVE SYNC ──
+function syncToDrive() {
+  var content = buildDocContent();
+  var encoded = unescape(encodeURIComponent(content));
+  if (docId) return updateDoc(docId, encoded);
+  return createDoc(encoded);
+}
 function createDoc(encoded) {
-  // Step 1: Create the file metadata
-  fetch('https://www.googleapis.com/drive/v3/files', {
+  return fetch('https://www.googleapis.com/drive/v3/files', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'Claude Weekly To-Do', mimeType: 'text/plain' })
   })
   .then(function(r) { return r.json(); })
-  .then(function(file) {
-    docId = file.id;
-    dbSet(DOC_ID_KEY, docId);
-    return updateDoc(docId, encoded);
-  })
-  .catch(function(err) { showToast('Error creating doc: ' + err.message, 'error'); });
+  .then(function(file) { docId = file.id; dbSet(DOC_ID_KEY, docId); return updateDoc(docId, encoded); });
 }
-
 function updateDoc(id, encoded) {
   return fetch('https://www.googleapis.com/upload/drive/v3/files/' + id + '?uploadType=media', {
     method: 'PATCH',
     headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'text/plain' },
     body: encoded
-  })
-  .then(function(r) {
-    if (!r.ok) throw new Error('Upload failed: ' + r.status);
-    showToast('✅ Synced to Google Drive! Claude can now see your tasks.', 'success');
-  })
-  .catch(function(err) {
-    // Token may have expired — re-auth and retry
-    if (err.message.indexOf('401') !== -1 || err.message.indexOf('403') !== -1) {
-      googleToken = null;
-      updateGoogleBar(false);
-      document.getElementById('shareBtn').style.display = 'none';
-      showToast('Google session expired — please sign in again', 'error');
-    } else {
-      showToast('Sync error: ' + err.message, 'error');
+  }).then(function(r) {
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403) {
+        googleToken = null; updateGoogleBar(false);
+        document.getElementById('shareBtn').style.display = 'none';
+        throw new Error('Google session expired — please sign in again');
+      }
+      throw new Error('Drive upload failed: ' + r.status);
     }
   });
 }
@@ -316,13 +417,11 @@ function renderAll() {
   document.getElementById('weekOf').value = state.weekOf || 'May 12, 2026';
   renderSections(); checkRollover();
 }
-
 function renderSections() {
   var grid = document.getElementById('sectionsGrid');
   grid.innerHTML = '';
   SECTIONS.forEach(function(sec) { grid.appendChild(buildSection(sec)); });
 }
-
 function buildSection(sec) {
   var tasks = state.tasks[sec.id] || [];
   var div = document.createElement('div');
@@ -342,7 +441,6 @@ function buildSection(sec) {
   div.appendChild(panel);
   return div;
 }
-
 function renderTaskList(el, secId, tasks) {
   el.innerHTML = '';
   if (!tasks.length) { el.innerHTML = '<div class="empty-hint">Tap ✏️ to handwrite or + to type</div>'; return; }
@@ -352,7 +450,6 @@ function renderTaskList(el, secId, tasks) {
     el.appendChild(row);
   });
 }
-
 function refreshTaskList(secId) { var el = document.getElementById('tasks_' + secId); if (el) renderTaskList(el, secId, state.tasks[secId]||[]); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -372,7 +469,6 @@ function toggleDrawPanel(secId) {
   else { panel.classList.add('open'); initPanelCanvas(secId); activePanel = secId; setTimeout(function(){ var s=document.getElementById('sec_'+secId); if(s) s.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 80); }
 }
 function closePanel(secId) { var p=document.getElementById('panel_'+secId); if(p) p.classList.remove('open'); if(activePanel===secId) activePanel=null; }
-
 function initPanelCanvas(secId) {
   var canvas = document.getElementById('cv_' + secId);
   if (!canvas || canvas._ready) return;
@@ -395,7 +491,6 @@ function initPanelCanvas(secId) {
   canvas.addEventListener('mouseleave', function(){ p.drawing=false; });
   canvas._panel = p;
 }
-
 function applyPanelStyle(p, secId) {
   var ctx = p.ctx;
   if (p.erasing) { ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=28; }
@@ -423,7 +518,6 @@ function readPanelHandwriting(secId) {
   var base64=flat.toDataURL('image/jpeg',0.85).split(',')[1];
   var btn=document.getElementById('rb_'+secId); if(btn){btn.textContent='⏳';btn.disabled=true;}
   showToast('Reading your handwriting...', 'loading');
-
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
@@ -442,11 +536,11 @@ function readPanelHandwriting(secId) {
     var json = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
     var tasks = json.tasks || []; if(typeof tasks==='string') tasks=[tasks];
     var added=0; tasks.forEach(function(t){if(t&&t.trim()){addTask(secId,t.trim());added++;}});
-    showToast('Added '+added+' task'+(added!==1?'s':'')+' \u2713');
+    showToast('Added '+added+' task'+(added!==1?'s':'')+' ✓');
     closePanel(secId);
   })
   .catch(function(err){ showToast('Error: '+err.message,'error'); })
-  .finally(function(){ if(btn){btn.textContent='Add \u2728';btn.disabled=false;} });
+  .finally(function(){ if(btn){btn.textContent='Add ✨';btn.disabled=false;} });
 }
 
 // ── WEEK ──
@@ -460,7 +554,6 @@ document.getElementById('newWeekBtn').addEventListener('click', function(){
   SECTIONS.forEach(function(s){state.tasks[s.id]=[];});
   saveState(); renderAll();
 });
-
 function checkRollover() { var b=document.getElementById('rolloverBanner'); if(!state.lastWeekTasks){b.style.display='none';return;} var has=Object.keys(state.lastWeekTasks).some(function(k){return (state.lastWeekTasks[k]||[]).length>0;}); b.style.display=has?'flex':'none'; }
 function rolloverTasks() { if(!state.lastWeekTasks) return; SECTIONS.forEach(function(s){(state.lastWeekTasks[s.id]||[]).forEach(function(t){addTask(s.id,t.text,true);});}); state.lastWeekTasks=null; saveState(); renderAll(); }
 
